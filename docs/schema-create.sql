@@ -34,6 +34,7 @@ CREATE TABLE wt_chunk_in_block_frequency_record
 		`content_id2` integer ,
 		`text_block_id` integer ,
 		`frequency` double precision ,
+		`is_top` bit(1),
 
 		CONSTRAINT pk_wt_chunk_in_block_frequency_record PRIMARY KEY (`id`)
 );
@@ -55,5 +56,6 @@ ALTER TABLE `wt_text_chunk` ADD INDEX `leftover_content_id` (`leftover_content_i
 ALTER TABLE `wt_chunk_in_block_frequency_record` ADD INDEX `content_id1` (`content_id1`);
 ALTER TABLE `wt_chunk_in_block_frequency_record` ADD INDEX `content_id2` (`content_id2`);
 ALTER TABLE `wt_chunk_in_block_frequency_record` ADD INDEX `text_block_id` (`text_block_id`);
+ALTER TABLE `wt_chunk_in_block_frequency_record` ADD INDEX `is_top` (`is_top`);
 
 rollback;

@@ -8,3 +8,8 @@ function getDb()
 {
     return new PDO('mysql:host=localhost;dbname=wordtool', 'wordtooluser', 'wordtoolpassword');
 }
+
+
+//this var be made global for tuning.
+$frequencyLimit = 5;
+

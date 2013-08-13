@@ -21,6 +21,8 @@ function showRecentTexts()
 
 function uploadNewText()
 {
+    global $frequencyLimit;
+
     $name = mb_strtolower($_POST["name"], 'UTF-8');
     $text = $_POST["text"];
 
@@ -53,6 +55,19 @@ function uploadNewText()
     {
         $ids = explode("_", $comb);
         $stmt->execute(array((int) $ids[0], (int) $ids[1], $textId, $weight));
+    }
+
+    //mark top combinations. update with limit are not SQL standard, so we made it with subquery.
+    //mysql doesn't support subqueries limits overall, so two requests.
+
+    $stmt = $db->prepare("select id from wt_chunk_in_block_frequency_record where text_block_id = ? order by frequency desc limit " .$frequencyLimit);
+    $stmt->execute(array($textId));
+    $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $stmtUpdate = $db->prepare("update wt_chunk_in_block_frequency_record set is_top = 1 where id  = ?");
+    foreach($records as $r)
+    {
+        $stmtUpdate->execute(array($r["id"]));
     }
 
     $answer = array("type"=>"uploaddone", "id"=>$textId);
@@ -95,6 +110,8 @@ function analyzeText($textId)
 
 function showTextInfo()
 {
+    global $frequencyLimit;
+
     $textId = (int) $_POST["id"];
     $db = getDb();
     $sth = $db->prepare('SELECT cont.content as c1, sep.content as c2 from wt_text_chunk tc left join wt_indexed_string cont on (cont.id = tc.content_id)  left join wt_indexed_string sep on (sep.id = tc.leftover_content_id) where tc.text_block_id = ? order by tc.order_number');
@@ -109,15 +126,31 @@ function showTextInfo()
     }
 
 
-    $sth = $db->prepare('SELECT c1.content as a, c2.content as b, tf.frequency as f from wt_chunk_in_block_frequency_record tf left join wt_indexed_string c1 on (c1.id = tf.content_id1) left join wt_indexed_string c2 on (c2.id = tf.content_id2) where tf.text_block_id = ? order by tf.frequency desc limit 10');
-    $sth->execute(array($textId));
+    $sth = $db->prepare('SELECT tf.content_id1 as c1, tf.content_id2 as c2, c1.content as a, c2.content as b, tf.frequency as f from wt_chunk_in_block_frequency_record tf left join wt_indexed_string c1 on (c1.id = tf.content_id1) left join wt_indexed_string c2 on (c2.id = tf.content_id2) where tf.text_block_id = ? and tf.is_top = 1 order by tf.frequency desc limit '. $frequencyLimit);
+    $sth->execute(array($textId)) or print_r ($sth->errorInfo());
 
     $freq_info = $sth->fetchAll(PDO::FETCH_ASSOC);
 
-    $answer = array("type"=>"text", "text"=>$restoredText, "freq_info" => $freq_info);
+    $sqlSimilar = "select wf.text_block_id as id, it.content, wt.created, count(*) as cnt, sum(wf.frequency) as freq from wt_chunk_in_block_frequency_record wf left join wt_text_block wt on (wt.id = wf.text_block_id) left join wt_indexed_string it on  (it.id = wt.name_id) where wf.is_top = 1 and wf.text_block_id != ? and ( FALSE ";
+    $params = array();
+    $params[] = $textId;
+    foreach($freq_info as $r)
+    {
+        $sqlSimilar .= " or (wf.content_id1 = ? and wf.content_id2 = ?)";
+        $params[] = $r["c1"];
+        $params[] = $r["c2"];
+    }
+
+    $sqlSimilar .= ") group by wf.text_block_id, it.content, wt.created order by count(*) desc limit 5";
+    $sth = $db->prepare($sqlSimilar);
+    $sth->execute($params) or print_r ($sth->errorInfo());
+
+    $similar_info = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+
+    $answer = array("type"=>"text", "text"=>$restoredText, "freq_info" => $freq_info, "similar" => $similar_info);
 
     echo json_encode($answer);
-
 }
 
 /**
@@ -191,7 +224,7 @@ function splitByPairs($string)
 }
 
 /**
- * @param $arr or strings
+ * @param $arr of strings
  * Optimized way of getting ids from DB indexed table
  *
  * @return array with both content and ids, NOT a hash.
@@ -232,6 +265,8 @@ function getOrCreateIndexedTextIds($arr)
             $sth->execute(array($id));
 
         //after insert, let's get them ids out;
+        //this can be done in one query, it was made one by one to avoid mysql bug with unique constraint
+        // which treats '.' and '. ' as same. Doh.
         //no recursion since dumb mysql bug!!!
         $inQuery = implode(',', array_fill(0, count($stringUnknown), '?'));
         $qw = 'SELECT it.id, it.content from wt_indexed_string it where it.content in ('.  $inQuery . ' )';

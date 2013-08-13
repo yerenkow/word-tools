@@ -21,26 +21,29 @@
                 <div id="leftpart"></div>
             </td>
             <td>
-                <a href="javascript:void(0);" id="upload-text-button">Проанализировать новый текст</a> <br/>
-                <h3>Оригинальный текст</h3>
+                <a href="javascript:void(0);" id="upload-text-button">Analyze new text</a> <br/>
+                <h3>Original text</h3>
                 <div id="mainpart">
                 </div>
-                <h3>Частые комбинации</h3>
+                <h3>Frequent combinations</h3>
                 <div id="freqpart">
+                </div>
+                <h3>Similar texts</h3>
+                <div id="similarpart">
                 </div>
             </td>
         </tr>
     </table>
 </body>
 
-<div id="new-text-upload" title="Проанализировать новый текст" style="display: none;">
-    <p class="validateTips">Название, Текст - обязательное поле.</p>
+<div id="new-text-upload" title="Analyze new text" style="display: none;">
+    <p class="validateTips">Name, text - required.</p>
     <form method="POST" onsubmit="return false;">
         <fieldset>
-            <label for="name">Название</label>
-            <input type="text" name="name" id="name" value="" placeholder="Произвольное название"
+            <label for="name">Name</label>
+            <input type="text" name="name" id="name" value="" placeholder="Any name"
                    class="text ui-widget-content ui-corner-all"/>
-            <label for="text">Текст</label>
+            <label for="text">Text</label>
             <textarea id="text" name="text" rows="12" cols="64"  ></textarea>
         </fieldset>
     </form>

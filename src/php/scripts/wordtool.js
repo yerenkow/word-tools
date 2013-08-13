@@ -28,8 +28,8 @@ $(function() {
     function checkLength( o, n, min, max ) {
         if ( o.val().length > max || o.val().length < min ) {
             o.addClass( "ui-state-error" );
-            updateTips( "Длина поля '" + n + "' должна быть от " +
-                min + " до " + max + " символов." );
+            updateTips( "Field length '" + n + "' must be bigger than " +
+                min + " and less than " + max + " symbols." );
             return false;
         } else {
             return true;
@@ -51,12 +51,12 @@ $(function() {
         width: 800,
         modal: true,
         buttons: {
-            "Проанализировать текст": function() {
+            "Upload text for analysis": function() {
                 var bValid = true;
                 uploadFields.removeClass( "ui-state-error" );
 
-                bValid = bValid && checkLength( uploadName, "Название", 3, 50 );
-                bValid = bValid && checkLength( uploadText, "Текст", 10, 100000 );
+                bValid = bValid && checkLength( uploadName, "Name", 3, 50 );
+                bValid = bValid && checkLength( uploadText, "Text", 10, 100000 );
 
                 if ( bValid ) {
                     jQuery.post(controllerUrl,
@@ -68,7 +68,7 @@ $(function() {
                     );
                 }
             },
-            "Отмена": function() {
+            "Cancel": function() {
                 $( this ).dialog( "close" );
             }
         },
@@ -106,7 +106,7 @@ function genericHandler(result)
     var data = eval("("+result+")");
     if(data.action == 'error')
     {
-        alert('Произошла ошибка. ' + (data.message ? data.message : ''));
+        alert('Error occured. ' + (data.message ? data.message : ''));
     }
     if(data.type == 'recent')
     {
@@ -115,7 +115,7 @@ function genericHandler(result)
         var list = "&nbsp;<br />";
         if(data.records.length == 0)
         {
-            list += " Нет текстов. ";
+            list += " No texts. ";
         }
         for (var x = 0; x < data.records.length; x++)
         {
@@ -142,6 +142,14 @@ function genericHandler(result)
             freqinfo += wf.a + " <strong>+</strong> " + wf.b + " <strong>=</strong> " + wf.f +  " <br />";
         }
         $( "#freqpart").html(freqinfo);
+
+        var similarpart = "";
+        for (var x = 0; x < data.similar.length; x++)
+        {
+            var sim = data.similar[x];
+            similarpart += "<a href='javascript:void(0);' onclick='showText(" + sim.id +")' > " + sim.content + " (" + sim.created + "); Matched " + sim.cnt+ " word combinations, total weight sum " + sim.freq+" </a>  <br />";
+        }
+        $( "#similarpart").html(similarpart);
     }
 }
 
