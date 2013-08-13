@@ -1,0 +1,50 @@
+<html>
+<head>
+    <title>This is POC of word pairs frequency calculator</title>
+    <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+    <script type="text/javascript" src="./scripts/wordtool.js"></script>
+    <link rel="stylesheet" href="./styles/style.css" />
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css"/>
+</head>
+<body>
+    <table class="maintable">
+        <thead>
+        <tr>
+            <th style="width: 20%;">Recent texts</th>
+            <th>Main area</th>
+        </tr>
+        </thead>
+        <tr style="vertical-align: top;">
+            <td style="height: 400px;">
+                <div id="leftpart"></div>
+            </td>
+            <td>
+                <a href="javascript:void(0);" id="upload-text-button">Проанализировать новый текст</a> <br/>
+                <h3>Оригинальный текст</h3>
+                <div id="mainpart">
+                </div>
+                <h3>Частые комбинации</h3>
+                <div id="freqpart">
+                </div>
+            </td>
+        </tr>
+    </table>
+</body>
+
+<div id="new-text-upload" title="Проанализировать новый текст" style="display: none;">
+    <p class="validateTips">Название, Текст - обязательное поле.</p>
+    <form method="POST" onsubmit="return false;">
+        <fieldset>
+            <label for="name">Название</label>
+            <input type="text" name="name" id="name" value="" placeholder="Произвольное название"
+                   class="text ui-widget-content ui-corner-all"/>
+            <label for="text">Текст</label>
+            <textarea id="text" name="text" rows="12" cols="64"  ></textarea>
+        </fieldset>
+    </form>
+</div>
+
+</html>
+

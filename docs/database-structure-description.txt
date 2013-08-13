@@ -1,0 +1,33 @@
+The DB scheme are specified in violet model. From this model
+
+IndexedString
+    this table contains all String occurrences. This is useful since we have limited amount of words in any language.
+    field `length` could be useful to simplify queries plans, if DB could handle such indexes properly.
+
+TextBlock
+    this table contains meta information about given text block, like name, creation time.
+    Blocks nesting are supported, so any big text can be splitted to smaller, and full analysis can be got from not only
+    full text, but from partial too. This could be useful to find similar parts of texts, while whole textes would
+    appear to be different.
+    To improve schema, two first and two last word ids could be specified here too. This could be useful when all
+    parts texts are already analysed, and to calculate whole text word frequencies we'll have no need to select data
+    from text chunks.
+
+TextChunk
+    this table contains ordered records about all words in text. To keep special characters, like commas, dots, newlines
+    etc, there is leftoverContentId, which are not used while calculating word frequencies, but to restore full text
+    intact.
+
+IgnoredWord
+    this table contains info which used to make ignored special words not go to calculation. This table is simple, and
+    can be improved by making it more general, for example by `flagging` some words with many flags, 'ignore' can be
+    just one of them. Also, different scopes can be specified, global, local.
+
+ChunkInBlockFrequencyRecord
+    this table contains parsed data analysis about word pairs in textblocks.
+
+
+Note that all tables except IndexedString are normalized (they have no variable length fields), so this will improve
+    overall performance. IndexedString have ways to improve too (for example have many tables with fixed length strings,
+    merged as `view` or programmatically)
+
