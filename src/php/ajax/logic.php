@@ -213,6 +213,12 @@ function splitByPairs($string)
                 $state = $STATE_IN_SEPARATOR;
                 $currentSeparator .= $symbol;
             }
+            else if($state == $STATE_NONE)
+            {
+                $state = $STATE_IN_SEPARATOR;
+                $currentWord = "";
+                $currentSeparator .= $symbol;
+            }
         }
     }
     if($state == $STATE_IN_SEPARATOR || $state == $STATE_IN_WORD)
